@@ -9,18 +9,76 @@
 1. Start a fresh Claude Code session with the Higgsfield connector already attached.
 2. Say: "generate the COBACCO creatives from the runbook."
 3. Validate **CB-004 (the single static)** first. Only proceed to the rest once the product
-   match (tube shape, lilac cap, label legibility) is approved.
+   match (tube shape, pointed nozzle tip, mint-green + lilac body, label legibility) is approved.
 4. Save every output URL into the Drive **Creative Tracker** (Tab 4) + Creative Briefs folder.
+
+## ⛔ MANDATORY PRE-FLIGHT: Product Reference Audit
+
+**Do not submit any generation job until this checklist is complete.**
+
+Product accuracy — especially cap shape, tube color, and serum consistency — is non-negotiable.
+A generation that misrepresents the product cannot be used and wastes the credit.
+
+### Step 1 — Verify the Marketing Studio product entity
+Use the full-reference product entity (created 2026-06-01) which contains all 11 Shopify images:
+- **Marketing Studio product ID:** `66923fab-36ee-4e72-92e2-94236c87ac38` (FULL REF v2 — corrected nozzle + serum color, 2026-06-01)
+- Always pass this via `--product_ids` for Marketing Studio jobs.
+- For raw image/video generation (non-Marketing-Studio), attach references manually (see below).
+
+### Step 2 — Confirm reference images cover all three accuracy axes
+Before generating, verify the reference set visually includes:
+- [ ] **Nozzle** — narrow pointed white dispensing tip at the bottom of the tube (squeeze tube). NOT a pump, NOT a flip cap, NOT a wide opening.
+- [ ] **Tube body color** — soft mint-green fading to white at base, with a lilac/lavender accent stripe
+- [ ] **Serum color & texture** — warm golden-amber gel, visibly pigmented and glossy when dispensed. NOT transparent, NOT white.
+
+### Step 3 — Attach the right references per job type
+**For image generation (GPT Image 2 / Nano Banana):** attach at minimum:
+- `cobacco-product-imgs-1000x1000-SPF-1.png` (clean studio, full tube)
+- `spf50-product-color-1.jpg` or `spf50-product-color-2.jpg` (cap + color close-up)
+- A `spf50-product-color-*` shot that shows the actual serum/use context
+
+**For video generation (Seedance / Marketing Studio):** always use the Marketing Studio product
+entity `0afd4ba7-b57b-42b9-bef0-4cc46be16929` which carries all 11 images. Do not generate
+video with only 1–2 reference images — this was the root cause of CB-001's inaccuracy.
+
+### Full Shopify reference image set (source of truth)
+| File | Shows |
+|---|---|
+| `cobacco-product-imgs-1000x1000-SPF-1.png` | Clean white-bg, full tube front |
+| `cobacco-product-imgs-1000x1000-SPF-2.png` | Full tube angle 2 |
+| `cobacco-product-imgs-1000x1000-SPF-3.png` | Full tube angle 3 |
+| `cobacco-product-imgs-1000x1000-SPF-4.png` | Full tube angle 4 |
+| `spf-product-1-v2-compressed.jpg` | Styled hero |
+| `spf50-product-color-1.jpg` | Cap + body color close-up |
+| `spf50-product-color-2.jpg` | Cap + body color close-up |
+| `spf50-product-color-3.jpg` | Color/texture |
+| `spf50-product-color-4.jpg` | Color/texture |
+| `spf50-product-color-5.jpg` | Color/texture |
+| `spf50-product-color-6.jpg` | Color/texture |
+| `spf-buy2-get1.png` | Bundle (3 tubes) |
+| `spf-buy2-getmini.png` | Bundle variant |
+
+All URLs: `https://cdn.shopify.com/s/files/1/0944/6339/4141/files/<filename>?v=<version>`
+(versions listed in Shopify product media, handle: `spf-face`).
+
+---
 
 ## Reference images (product fidelity — ALWAYS attach)
 Use these in every job so the tube/label stays consistent:
 - Primary (clean white-bg tube): `https://cdn.shopify.com/s/files/1/0944/6339/4141/files/cobacco-product-imgs-1000x1000-SPF-1.png?v=1758013041`
-- Secondary (styled): `https://cdn.shopify.com/s/files/1/0944/6339/4141/files/spf-product-1-v2-compressed.jpg?v=1772013863`
+- Cap close-up 1: `https://cdn.shopify.com/s/files/1/0944/6339/4141/files/spf50-product-color-1.jpg?v=1758013041`
+- Cap close-up 2: `https://cdn.shopify.com/s/files/1/0944/6339/4141/files/spf50-product-color-2.jpg?v=1772013863`
+- Styled hero: `https://cdn.shopify.com/s/files/1/0944/6339/4141/files/spf-product-1-v2-compressed.jpg?v=1772013863`
 - Bundle 2+gift / 2+3rd-free reference: `https://cdn.shopify.com/s/files/1/0944/6339/4141/files/spf-buy2-get1.png?v=1758013041`
 
-Product description (for prompt grounding): COBACCO SPF 50+ face serum & primer, 30ml,
-soft mint-green squeeze tube, lilac/purple cap, label reads
-"COBACCO Invisible protection & Lightweight feel · SPF 50+ · FACE SERUM & PRIMER · 30ML".
+Product description (for prompt grounding): COBACCO SPF 50+ face serum & primer, 30ml.
+**Tube:** soft mint-green body fading to white at the base, with a lilac/lavender accent stripe.
+**Nozzle:** narrow pointed dispensing tip at the bottom (squeeze tube — user squeezes from
+the bottom, product comes out through a pointed white nozzle tip). NOT a pump. NOT a flip cap.
+**Label reads:** "COBACCO · Invisible protection & Lightweight feel · SPF 50+ · FACE SERUM &
+PRIMER · 30ML · Moisturising · All skin types"
+**Serum texture/color:** warm golden-amber gel, visibly pigmented and glossy — NOT transparent,
+NOT white. When applied to skin it appears as a rich golden drop that blends to invisible finish.
 
 ---
 
