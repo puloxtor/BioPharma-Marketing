@@ -27,9 +27,9 @@ Use the full-reference product entity (created 2026-06-01) which contains all 11
 
 ### Step 2 — Confirm reference images cover all three accuracy axes
 Before generating, verify the reference set visually includes:
-- [ ] **Nozzle** — narrow pointed white dispensing tip at the bottom of the tube (squeeze tube). NOT a pump, NOT a flip cap, NOT a wide opening.
+- [ ] **Nozzle** — narrow pointed white **ribbed/threaded** dispensing tip at the bottom of the tube (squeeze tube). NOT a pump, NOT a flip cap, NOT a wide opening. ✅ confirmed correct.
 - [ ] **Tube body color** — soft mint-green fading to white at base, with a lilac/lavender accent stripe
-- [ ] **Serum color & texture** — warm golden-amber gel, visibly pigmented and glossy when dispensed. NOT transparent, NOT white.
+- [ ] **Serum color & texture** — **clear, transparent, colorless glossy gel** (like a thick water-gel). NOT golden, NOT amber, NOT white, NOT pigmented. It reads glassy/see-through on skin.
 
 ### Step 3 — Attach the right references per job type
 **For image generation (GPT Image 2 / Nano Banana):** attach at minimum:
@@ -77,8 +77,9 @@ Product description (for prompt grounding): COBACCO SPF 50+ face serum & primer,
 the bottom, product comes out through a pointed white nozzle tip). NOT a pump. NOT a flip cap.
 **Label reads:** "COBACCO · Invisible protection & Lightweight feel · SPF 50+ · FACE SERUM &
 PRIMER · 30ML · Moisturising · All skin types"
-**Serum texture/color:** warm golden-amber gel, visibly pigmented and glossy — NOT transparent,
-NOT white. When applied to skin it appears as a rich golden drop that blends to invisible finish.
+**Serum texture/color:** clear, transparent, colorless glossy gel — a thick water-gel that
+streams from the nozzle and reads glassy/see-through on skin. NOT golden, NOT amber, NOT white,
+NOT pigmented. Blends to an invisible, luminous finish.
 
 ---
 
