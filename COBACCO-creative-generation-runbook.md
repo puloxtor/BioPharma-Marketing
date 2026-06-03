@@ -20,9 +20,10 @@ Product accuracy — especially cap shape, tube color, and serum consistency —
 A generation that misrepresents the product cannot be used and wastes the credit.
 
 ### Step 1 — Verify the Marketing Studio product entity
-Use the full-reference product entity (created 2026-06-01) which contains all 11 Shopify images:
-- **Marketing Studio product ID:** `66923fab-36ee-4e72-92e2-94236c87ac38` (FULL REF v2 — corrected nozzle + serum color, 2026-06-01)
-- Always pass this via `--product_ids` for Marketing Studio jobs.
+- **⚠️ CANONICAL entity (as of 2026-06-03):** `400b1f5d-6483-4de3-ad83-9b7adaa08fb0` — rebuilt with all 13 Shopify images + corrected clear-gel/ribbed-nozzle description. Use this for all new Marketing Studio jobs.
+- **DEPRECATED:** `66923fab-36ee-4e72-92e2-94236c87ac38` (wrong "golden-amber gel" description — do not use)
+- **DEPRECATED:** `0afd4ba7-b57b-42b9-bef0-4cc46be16929` (wrong "flip cap" description — do not use)
+- **DEPRECATED:** `91238a80-5b4a-472c-9c79-cca9a79e2f7b` (lean 3-image entity — deprecated in favour of full 13-image rebuild)
 - For raw image/video generation (non-Marketing-Studio), attach references manually (see below).
 
 ### Step 2 — Confirm reference images cover all three accuracy axes
@@ -146,6 +147,122 @@ Reference v2. Free-shipping lines: BG "над €30" · SK "nad €35" · CZ "na
 - All statics: deliver 1:1 + 9:16 where noted.
 - Resolution: 2k for all product-photoshoot jobs.
 - Frequency cap target < 2.5; refresh creative every 3–4 weeks.
+
+---
+
+## Localized Video Pipeline (generate → QC → localize → mux)
+
+> This section replaces the ad-hoc approach used in CB-001/CB-002. Follow this
+> pipeline for every new video creative. It enforces product fidelity, automated QC,
+> and real Bulgarian localization (not Higgsfield TTS, which cannot speak Bulgarian).
+
+### Core rule — Seedance-first for product accuracy
+Avatar/text-to-video models **regenerate** the product and morph the nozzle.
+**Always use `seedance_2_0` with `start_image` = a real Shopify photo for any shot
+where the product or nozzle is visible.** Use Marketing Studio (avatar) only for
+wide/medium talking segments where the tube is not the focal subject, and back-cut
+to Seedance B-roll for any close-up.
+
+**Format: VO-over-B-roll.** Most shots are Seedance product B-roll + Bulgarian
+voiceover on top. No visible speaking mouth → BG audio syncs perfectly.
+
+### Stage 0 — Real product pixels
+Pull real product URLs from Shopify (`get-product`, handle `spf-face`). The 13-image
+table in "Full Shopify reference image set" above is the source of truth.
+
+### Stage 1 — (Re)build the canonical Marketing Studio entity
+Run once (or when Shopify images change):
+- `show_marketing_studio` action=create, type=product
+- Upload all ~13 images (use `media_upload` for each, then pass media IDs)
+- Description (verbatim): "Mint-green squeeze tube fading to white at base, lilac/lavender
+  accent stripe. POINTED WHITE RIBBED nozzle tip at the BOTTOM (squeeze tube — user
+  squeezes from the bottom, serum exits through a narrow pointed white nozzle tip).
+  NOT a pump, NOT a flip cap. Serum is CLEAR TRANSPARENT COLORLESS glossy gel — a thick
+  water-gel that reads glassy/see-through on skin. NOT golden, NOT amber, NOT white,
+  NOT pigmented. Label: COBACCO · Invisible protection & Lightweight feel · SPF 50+ ·
+  FACE SERUM & PRIMER · 30ML · Moisturising · All skin types."
+- Canonical entity ID: `400b1f5d-6483-4de3-ad83-9b7adaa08fb0` (created 2026-06-03, 13 images).
+  Rebuild only if Shopify product images change significantly.
+
+### Stage 2 — Generate B-roll (Seedance image-to-video)
+```
+generate_video(
+  model="seedance_2_0",
+  start_image="<real Shopify photo URL or uploaded media ID>",
+  aspect_ratio="9:16",
+  duration=10,
+  prompt="<shot description — product animation, no speaking presenter>"
+)
+```
+Poll `job_display` until `completed`. Generate 2–4 B-roll clips per brief.
+
+### Stage 3 — Automated QC gate
+1. **Engagement:** Run `virality_predictor` on completed clip. Use `scripts/qc_gate.py`
+   to check scores against thresholds: hook ≥70 / attention ≥65 / retention ≥60 /
+   creative ≥65 / distraction low.
+2. **Fidelity (binary):** Extract frames with imageio-ffmpeg (or `python3 -c "import imageio_ffmpeg; ..."`),
+   Read them, verify against the three accuracy axes: ribbed nozzle at bottom / mint-green
+   body / clear transparent colorless gel. Morphed nozzle or wrong gel color = automatic fail.
+3. On fail: re-submit Seedance i2v from a different real photo angle. Max 3 attempts.
+   Log each attempt's job ID + scores in the CB brief's Generation history table.
+
+### Stage 4 — Assemble
+- `upscale_video` approved clips; `reframe` to 9:16 if needed.
+- Concatenate multi-shot B-roll with ffmpeg (imageio-ffmpeg):
+  ```
+  ffmpeg -f concat -safe 0 -i shots.txt -c copy build/assembled.mp4
+  ```
+  where `shots.txt` is a list of `file 'build/clip_01.mp4'` lines.
+
+### Stage 5 — Bulgarian voiceover (ElevenLabs, PATH A)
+**Prerequisites** (user must do these; agent cannot):
+1. Add `api.elevenlabs.io` to the environment network allowlist.
+2. Set `ELEVENLABS_API_KEY` env var.
+
+Verify before running:
+```bash
+curl -sS -m 10 -o /dev/null -w "%{http_code}" https://api.elevenlabs.io/v1/models
+echo $ELEVENLABS_API_KEY | cut -c1-4  # should print first 4 chars, not blank
+```
+
+Generate BG VO:
+```bash
+python3 scripts/elevenlabs_bg_vo.py \
+  --text-file scripts/vo_bg_cb002.txt \
+  --out build/vo_bg_cb002.mp3
+```
+Model: `eleven_multilingual_v2`, `language_code: bg`, voice: Aria (female multilingual).
+Override `--voice <id>` for a different ElevenLabs voice.
+
+**PATH B fallback (if network blocked):** The VO script text is committed in
+`scripts/vo_bg_cb002.txt`. Generate MP3 on your machine via ElevenLabs web UI or
+any TTS tool supporting Bulgarian, then proceed to Stage 6.
+
+### Stage 6 — Mux + verify
+```bash
+python3 scripts/mux_bg_vo.py \
+  --video build/assembled.mp4 \
+  --audio build/vo_bg_cb002.mp3 \
+  --out build/out_bg_cb002.mp4
+```
+Verification:
+- `ffprobe -v error -show_entries format=duration -of csv=p=0 build/out_bg_cb002.mp4`
+  → compare to video duration, assert |Δ| < 0.5s.
+- Extract frame: `python3 -c "import imageio_ffmpeg, subprocess; subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), '-i', 'build/out_bg_cb002.mp4', '-vf', 'fps=1', 'build/frame_%03d.png'])"`.
+  Read `build/frame_001.png`, `build/frame_005.png` → confirm product fidelity visually.
+- Confirm audio is non-silent and Bulgarian.
+- Run final `virality_predictor` on `build/out_bg_cb002.mp4`; log scores in the CB brief.
+
+### Scripts reference
+| Script | Purpose |
+|---|---|
+| `scripts/elevenlabs_bg_vo.py` | ElevenLabs TTS → `build/vo_bg_<cb>.mp3` |
+| `scripts/mux_bg_vo.py` | ffmpeg mux VO onto silent video |
+| `scripts/qc_gate.py` | Virality predictor QC gate thresholds |
+| `scripts/vo_bg_cb002.txt` | CB-002 Bulgarian VO script |
+| `build/` | Working artifacts (gitignored) |
+
+---
 
 ## Drive locations
 - Folder: COBACCO Meta Ads Campaign → Creative Briefs (sub-folder)
