@@ -43,5 +43,6 @@ from the real product photo** so the nozzle/label/color are the actual pixels, n
 - v1 (9bcefd05) / NSFW + Seedance person morph — rejected
 - v2 (14389bae) Marketing Studio avatar — rejected: nozzle morphed, English, creepy avatar
 - v3 (0f05d95a) **image-to-video from real photo** — nozzle-accurate; BG copy packaged for overlay
+- v4 (79d4cfe1) **Marketing Studio UGC, Bulgarian-speaking presenter** — 15s, 9:16, 720p; presenter delivers full BG VO script in natural bathroom setting; **URL:** https://d8j0ntlcm91z4.cloudfront.net/user_3AAke1QD9MZlxW9IxIN7IXlQ8tB/hf_20260603_052902_79d4cfe1-693e-4b57-a334-967ef835d12e.mp4
 
 **Free-shipping line (BG):** "над €30" (per runbook Localization/Shipping Reference).
