@@ -20,11 +20,10 @@ Product accuracy — especially cap shape, tube color, and serum consistency —
 A generation that misrepresents the product cannot be used and wastes the credit.
 
 ### Step 1 — Verify the Marketing Studio product entity
-- **⚠️ CANONICAL entity (as of 2026-06-03):** `a0b3173d-4e99-426b-8a41-29980a980907` — "COBACCO SPF 50+ — CANONICAL v4 (2-img)". Contains **only image #2** (`cobacco-product-imgs-1000x1000-SPF-2.png`) and **image #5** (`spf-product-1-v2-compressed.jpg`) — the two user-approved angles. Use this for all new Marketing Studio jobs.
-- **DEPRECATED:** `400b1f5d-6483-4de3-ad83-9b7adaa08fb0` (13-image entity — too many conflicting angles; replaced by 2-img canonical)
+- **⚠️ CANONICAL entity (as of 2026-06-03):** `400b1f5d-6483-4de3-ad83-9b7adaa08fb0` — rebuilt with all 13 Shopify images + corrected clear-gel/ribbed-nozzle description. Use this for all new Marketing Studio jobs.
 - **DEPRECATED:** `66923fab-36ee-4e72-92e2-94236c87ac38` (wrong "golden-amber gel" description — do not use)
 - **DEPRECATED:** `0afd4ba7-b57b-42b9-bef0-4cc46be16929` (wrong "flip cap" description — do not use)
-- **DEPRECATED:** `91238a80-5b4a-472c-9c79-cca9a79e2f7b` (lean 3-image entity — deprecated)
+- **DEPRECATED:** `91238a80-5b4a-472c-9c79-cca9a79e2f7b` (lean 3-image entity — deprecated in favour of full 13-image rebuild)
 - For raw image/video generation (non-Marketing-Studio), attach references manually (see below).
 
 ### Step 2 — Confirm reference images cover all three accuracy axes
@@ -39,7 +38,9 @@ Before generating, verify the reference set visually includes:
 - `spf50-product-color-1.jpg` or `spf50-product-color-2.jpg` (cap + color close-up)
 - A `spf50-product-color-*` shot that shows the actual serum/use context
 
-**For video generation (Seedance / Marketing Studio):** always use the canonical Marketing Studio product entity `a0b3173d-4e99-426b-8a41-29980a980907` (images #2 and #5). These two angles were user-approved for fidelity; more images introduced conflicting angles that caused morphing.
+**For video generation (Seedance / Marketing Studio):** always use the Marketing Studio product
+entity `0afd4ba7-b57b-42b9-bef0-4cc46be16929` which carries all 11 images. Do not generate
+video with only 1–2 reference images — this was the root cause of CB-001's inaccuracy.
 
 ### Full Shopify reference image set (source of truth)
 | File | Shows |
